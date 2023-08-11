@@ -1,0 +1,211 @@
+public class Student
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+    public int Grade { get; set; }
+    public bool Exceptional { get; set; }
+    public bool HonorRoll { get; set; }
+    public bool Passed { get; set; }
+}
+ 
+public class StudentConverter
+{
+    public List<Student> ConvertStudents(List<Student> students)
+    {
+        return students.Select(student =>
+        {
+            var result = new Student
+            {
+                Name = student.Name,
+                Age = student.Age,
+                Grade = student.Grade
+            };
+ 
+            if (student.Grade > 90)
+            {
+                if (student.Age < 21)
+                {
+                    result.Exceptional = true;
+                }
+                else
+                {
+                    result.HonorRoll = true;
+                }
+            }
+            else if (student.Grade > 70)
+            {
+                result.Passed = true;
+            }
+            else
+            {
+                result.Passed = false;
+            }
+ 
+            return result;
+        }).ToList();
+    }
+}
+
+ Write for ConvertStudents method following unit tests using NUnit.  Follow Student model and ConvertStudents method. 
+
+Case 1: High Achiever
+·	Given an array with a student object of age 21 or above and grade above 90, the function should return an object with the additional field HonorRoll = true.
+Case 2: Exceptional Young High Achiever
+·	Given an array with a student object of age less than 21 and grade above 90, the function should return an object with the additional field Exceptional = true.
+Case 3: Passed Student
+·	Given an array with a student object of grade between 71 and 90 (inclusive), the function should return an object with the additional field Passed = true.
+Case 4: Failed Student
+·	Given an array with a student object of grade 70 or less, the function should return an object with the additional field Passed = false.
+ChatGPT
+Certainly! Here are unit tests for the ConvertStudents method using NUnit:
+
+csharp
+Copy code
+using NUnit.Framework;
+using System.Collections.Generic;
+
+namespace YourNamespace.Tests
+{
+    public class StudentConverterTests
+    {
+        private StudentConverter _studentConverter;
+
+        [SetUp]
+        public void Setup()
+        {
+            _studentConverter = new StudentConverter();
+        }
+
+        [Test]
+        public void HighAchiever_ReturnsHonorRoll()
+        {
+            // Arrange
+            var students = new List<Student>
+            {
+                new Student { Age = 21, Grade = 91 }
+            };
+
+            // Act
+            var result = _studentConverter.ConvertStudents(students);
+
+            // Assert
+            Assert.IsTrue(result[0].HonorRoll);
+        }
+
+        [Test]
+        public void ExceptionalYoungHighAchiever_ReturnsExceptional()
+        {
+            // Arrange
+            var students = new List<Student>
+            {
+                new Student { Age = 20, Grade = 91 }
+            };
+
+            // Act
+            var result = _studentConverter.ConvertStudents(students);
+
+            // Assert
+            Assert.IsTrue(result[0].Exceptional);
+        }
+
+        [Test]
+        public void PassedStudent_ReturnsPassedTrue()
+        {
+            // Arrange
+            var students = new List<Student>
+            {
+                new Student { Age = 20, Grade = 71 }
+            };
+
+            // Act
+            var result = _studentConverter.ConvertStudents(students);
+
+            // Assert
+            Assert.IsTrue(result[0].Passed);
+        }
+
+        [Test]
+        public void FailedStudent_ReturnsPassedFalse()
+        {
+            // Arrange
+            var students = new List<Student>
+            {
+                new Student { Age = 20, Grade = 70 }
+            };
+
+            // Act
+            var result = _studentConverter.ConvertStudents(students);
+
+            // Assert
+            Assert.IsFalse(result[0].Passed);
+        }
+    }
+}
+This code assumes that your classes (Student and StudentConverter) are within a namespace named YourNamespace. Adjust the namespace in the using directive at the top of the unit test file accordingly to match the actual namespace in your project.
+
+Make sure you also have the necessary NuGet packages for NUnit (NUnit and NUnit3TestAdapter) added to your test project for these unit tests to run successfully.
+
+
+
+
+User
+Case 1: Empty Array
+·	Given an empty array, the function should return an empty array.
+Case 2: Not an Array 
+•	Given a null as an input the function should throw an error.
+ChatGPT
+Alright, here are the additional unit tests based on the new cases you've described:
+
+Testing for an empty array.
+Testing for a null input which should throw an error.
+csharp
+Copy code
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+
+namespace YourNamespace.Tests
+{
+    public class StudentConverterTests
+    {
+        private StudentConverter _studentConverter;
+
+        [SetUp]
+        public void Setup()
+        {
+            _studentConverter = new StudentConverter();
+        }
+
+        [Test]
+        public void EmptyArray_ReturnsEmptyArray()
+        {
+            // Arrange
+            var students = new List<Student>();
+
+            // Act
+            var result = _studentConverter.ConvertStudents(students);
+
+            // Assert
+            Assert.IsEmpty(result);
+        }
+
+        [Test]
+        public void NullInput_ThrowsException()
+        {
+            // Assert
+            Assert.Throws<ArgumentNullException>(() => _studentConverter.ConvertStudents(null));
+        }
+
+        // ... (Your other tests go here)
+
+    }
+}
+The first test checks if an empty array is provided as input, then the resulting list should also be empty. The second test ensures that if a null value is passed to the method, it throws an ArgumentNullException.
+
+If you want to be specific about the error message, you can capture the exception and then assert on its message like so:
+
+csharp
+Copy code
+var ex = Assert.Throws<ArgumentNullException>(() => _studentConverter.ConvertStudents(null));
+Assert.AreEqual("Expected error message here", ex.Message);
+Note: It's generally a good practice to handle null inputs in methods by throwing an ArgumentNullException or providing a default behavior, especially for public APIs. If the ConvertStudents method does not already throw this exception for null inputs, you would need to implement this in the method for the test to pass.
